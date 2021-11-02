@@ -13,3 +13,4 @@ As a former computer science major, so far everything seems to have been pretty 
 
 https://mvannas.github.io/IODS-project/
 
+FYI: SSH authentication is now required by GitHub, while the installation of the public key in the Guthub was simple, I used instructions in https://cyberhelp.sesync.org/faq/set-up-gitlab-ssh-key.html to configure RStudio correctly for SSH key. Also if its the first time you PUSH commit to Github and the PUSH asks something, you need to answer 'yes' to install the host key. 

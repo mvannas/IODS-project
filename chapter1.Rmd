@@ -11,6 +11,8 @@ date()
 ```
 As a former computer science major, so far everything seems to have been pretty easy. Some problems with the _DataCamp_, it doesn't always accept correct R scripts. I expect to learn abour using R to do my statistical work in my Thesis. Previously I have used _SPSS_, but always seemed to be lacking in the programming side. At least for now, R seems more familiar as a language due to, again, my former computer science experience. 
 
-https://mvannas.github.io/IODS-project/
+My Diary: https://mvannas.github.io/IODS-project/
+
+My Repository: https://github.com/mvannas/IODS-project
 
 FYI: SSH authentication is now required by GitHub, while the installation of the public key in the Guthub was simple, I used instructions in https://cyberhelp.sesync.org/faq/set-up-gitlab-ssh-key.html to configure RStudio correctly for SSH key. Also if its the first time you PUSH commit to Github and the PUSH asks something, you need to answer 'yes' to install the host key. 

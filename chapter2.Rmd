@@ -15,7 +15,7 @@ library(dplyr)
 
 test_data %>% group_by(gender) %>% summarise_at(vars(age, points,deep,stra, surf, attitude), list(name = mean))
 
-p <- ggpairs(test_data, mapping = aes(col = gender), lower = list(combo = wrap("facethist", bins = 20)))
+p <- ggpairs(test_data, mapping = aes(col = gender), upper = list(continuous = wrap('cor', size = 3)), lower = list(combo = wrap("facethist", bins = 20)))
 p
 ```
 

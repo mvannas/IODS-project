@@ -1,13 +1,69 @@
-# Insert chapter 2 title here
-
-*Describe the work you have done this week and summarize your learning.*
-
-- Describe your work and results clearly. 
-- Assume the reader has an introductory course level understanding of writing and reading R code as well as statistical methods.
-- Assume the reader has no previous knowledge of your data or the more advanced methods you are using.
+# Regression and model validation
 
 ```{r}
-date()
+test_data <- read.csv("data/work_data.csv")
+
+str(test_data)
 ```
 
-Here we go again...
+The dataset is originally collected between 3.12.2014 and 10.1.2015. It a combined survey with questions from ASSIST (Approaches and Study Skills Inventory for Students) and SATS (Survey of Attitudes Toward Statistics). A subset of this data is used in this exercise that contains participant background of gender (binary) and age, and a combined mean score for deep, strategic and surface approach for learning. Also contained in our subset is the patients total points (from ASSIST) and attitude towards statistics (from SATS). After removing cases with zero points, 166 cases remained and 7 variables each. 
+
+```{r}
+library(GGally)
+library(ggplot2)
+library(dplyr)
+
+test_data %>% group_by(gender) %>% summarise_at(vars(age, points,deep,stra, surf, attitude), list(name = mean))
+
+p <- ggpairs(test_data, mapping = aes(col = gender), lower = list(combo = wrap("facethist", bins = 20)))
+p
+```
+
+Here you can see the summary statistics and relationships between variables. There are more females than male participants, but there are no immediately observable differences between male and female score or points. Also the age average age of the participants is 24.9 (females) and 26.8 (males) with some outliers in both genders being clearly older. 
+
+Deep and surface approaches for learning seem to have a negative correlation for points, while strategic approach has positive correlation. Attitude also has a strong positive correlation to the overall points score. 
+
+```{r}
+model <- lm(points ~ attitude + stra + surf, data = test_data)
+summary(model)
+```
+
+Based on the previous correlation estimates, I selected attitude, strategic learning approaches score and surface approach learning score for multiple regression analysis. This summary shows that attitude has statistically the most significant, however estimated coefficient size is smallest (0.33952). It should be noted that this score is has not been averaged to 0-5 scale similarly to deep, stra and surf scores. Two options exist, you can either scale the explanatory variables to same or you can calculate standardized coefficient estimates for which there are ready R libraries. 
+
+```{r}
+library(QuantPsyc)
+lm.beta(model)
+```
+
+
+The surf score seems to have the least estimate of coefficient, so I remove it from the equation and recalculate. 
+
+```{r}
+model <- lm(points ~ attitude + stra, data = test_data)
+summary(model)
+```
+
+Reducing the amount of variables to just attitude and stra, but still stra score does not seem to be statistically significant (using p under 0.05 for statistical significance). Removing surf score did increase adjusted R-squared, which means this model is a better fit the observed data. 
+
+```{r}
+model <- lm(points ~ attitude, data = test_data)
+summary(model)
+```
+
+Running the model with just attitude results in R-squared being lower. Thus I would conclude that the previous model with stra and attitude as the explanatory models is a better fit.
+
+The multiple R-squared combines the variation of different explanatory variables in the model. Higher score is better, up to 1. 0 means the explanatory parameter do not explain any variation of observed values and 1 means they explain all the variations. The adjusted R-squared takes into account how much an added explanatory variable should increase the value, thus it grows only if the added variable add something useful to the model over pure chance. 
+
+Our linear model has some assumptions that the data used to model has to fulfill. Firstly, the model is linear, so the relationship between explanatory variables and target must be linear. Also usually it is assumed that the errors are normally distributed. The validity of these assumptions can be explored by looking at the residual plots. 
+
+```{r}
+model <- lm(points ~ attitude + stra, data = test_data)
+par(mfrow = c(2,2))
+plot(model, which = c(1,2,5))
+```
+
+Residuals vs Fitted values plot is used to check the model for constant variance of errors. Here in the top left panel we see our residuals vs fitted graphics. The scatter plot seems equally scattered without any obvious patterns. Therefore we conclude that our model when used with our data does have fairly constant variance of errors. 
+
+The normal Q-Q plot is used to check that our errors are normally distributed. The plot should show fairly little deviation from the line to be pass this check. Again in our model with our data it would seem that the errors are normally distributed. 
+
+The Residuals vs Leverage plot shows the residuals and Cook's distance. Cook's distance is estimation of influence of a observation on the parameters of the model. Usually values over 1 are suggestive of undue influence. Our model shows that while here are few observations that seem to have slightly more influence, the Cook's value is still very low and thus there are no observation with undue power over the model. 

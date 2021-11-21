@@ -1,0 +1,7 @@
+# Logistics regression
+
+```{r}
+d <- read.csv("data/data_excrs2.csv")
+
+str(d)
+```

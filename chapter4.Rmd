@@ -1,3 +1,4 @@
+# Clustering and Classification
 
 Our next exercise uses on the ready dataset available, the Boston-dataset. This dataset has information on the city of Boston with descriptive variables for observed suburbs.
 

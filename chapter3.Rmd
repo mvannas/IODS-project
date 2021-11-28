@@ -1,7 +1,66 @@
+
+
 # Logistics regression
 
-```{r}
+```{r message=TRUE, warning=TRUE}
 d <- read.csv("data/data_excrs2.csv")
 
-str(d)
+colnames(d)
 ```
+
+This dataset contains information on student grades, demographic, social and school related features. Joined information was collected from students in two courses, math and Portuguese language. Grades, absences, past failures of courses and extra paid courses were combined by using either mean of two values or for binary (yes/no) variables the math course value. All other values were assumed to be same.  
+
+This data was obtained from https://archive.ics.uci.edu/ml/datasets/Student+Performance#. More detailed information can be found there. 
+
+Target value of this exercise is the high/low consumption of alcohol. The explanatory variables selected for this excercise by the author are students age, sex, status of parents cohabitation (together or apart) and romatic relationship status (yes/no). Hypothesis is that single young males from families with parents livings apart would be more likely to use larger amounts of alcohol. 
+
+```{r message=TRUE, warning=TRUE}
+library("GGally")
+library("ggplot2")
+library("dplyr")
+
+d_sub <- select(d, sex, age, romantic, Pstatus, alc_high)
+# Convert romatic and Pstatus to boolen, Pstatus TRUE if together
+
+d_sub <- d_sub %>% mutate(romantic=(romantic == "yes"), Pstatus=(Pstatus=="T"))
+p <- ggpairs(d_sub, mapping = aes(col = sex), upper = list(continuous = wrap('cor', size = 3)), lower = list(combo = wrap("facethist", bins = 20)))
+p
+summary(d_sub)
+d_sub %>% group_by(sex) %>% summarize(n = n(), mean(age))
+```
+
+From the summary diagram above we can see the distribution of the chosen varibles. Male to female ratio is fairly even, students are mostly young. Very few students have parents living apart, and almost twice as many singles as in a relationship. Proportions in the boxplots for alcohol usage initially look similar to variable distributions in the data so thereis no clear evidence to support my hypothesis.  
+
+```{r message=TRUE, warning=TRUE}
+m <- glm(alc_high ~ sex + age + romantic + Pstatus, data = d_sub, family = "binomial")
+summary(m)
+odd_ratios <- coef(m) %>% exp()
+odds_ci <- confint(m) %>% exp()
+cbind(odd_ratios, odds_ci)
+```
+
+As we see here, males seem to have a higher tendency for higher alcohol usage, but slightly surpricingly older age in our student group also made it more likely to have higher alcohol consumption. Romatic status or parental status did not make sufficient difference, while it seems they do have some effect (both have coefficient under 1) to the direction of my hypothesis, this is not significant. Confidence interval includes 1 in both cases making them not significant. Thus my hypothesis is wrong in our data model. 
+
+```{r}
+loss_func <- function(class, prob) {
+  n_wrong <- abs(class - prob) > 0.5
+  mean(n_wrong)
+}
+
+p <- predict(m, type = "response")
+d_sub <- mutate(d_sub, alc_high_probability = p)
+d_sub <- mutate(d_sub, alc_high_predicted = alc_high_probability > 0.5)
+
+table(high_use = d_sub$alc_high, prediction = d_sub$alc_high_predicted)
+loss_func(class = d_sub$alc_high, prob = d_sub$alc_high_probability)
+loss_func(class = d_sub$alc_high, prob = 1)
+
+library("boot")
+cv <- cv.glm(data = d_sub, cost = loss_func, glmfit = m, K = 10)
+
+# average number of wrong predictions in the cross validation
+cv$delta[1]
+
+```
+
+My model seems to show 30% of inaccurately classified students. Looking at the 2x2 it seems that my model very seldomly predicts high alcohol usage. Assuming that there no students with high alcoholc consumption seems to result in the same amount of inaccurately classified students.   

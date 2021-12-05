@@ -1,0 +1,48 @@
+# Dimensionality reduction techniques
+
+```{r}
+library("ggplot2")                     
+library("GGally")
+library("corrplot")
+library("tidyverse")
+library("vtable")
+
+human <- read.csv("data/human.cvs")
+rownames(human) <- human$X
+human <- select(human, -X)
+
+```
+
+The following exercise is for dimensionality reduction techniques. IT is done by using the United Nations Development Programme data which is freely available. The data is available with explanations from the url below. 
+
+http://hdr.undp.org/en/content/human-development-index-hdi
+
+We used only some of the variables available. Variables used were gross national income per capita (gnicap), secondary education proportion male/female (popseceduP), labour force proportion male/female (labrateP), life expectancy at birth (lifebirth), maternal mortality ratio (mmr), adolescent birth rate (abirth) and percentage of female representatives in parliament (prp). 
+
+```{r}
+# Summary statistics
+st(human)
+ggpairs(human)
+```
+
+Only popsecedu2 of the variables looks like it might be standard distributed. Correlations are somewhat as expected, higher GNI countries have less maternal mortality and less adoslescent birth rate (fewer babies) but higher life expectancy at birth and proportion of females with secondary education. Also understandably there is a strong (negative) correlation between life expectancy and maternal mortality rate. Adolescent birth rate is negatively correlated with life expectancy at birth and positively with maternal mortality rate. Also secondary education proportion is correlated fairly strongly with life expectancy, maternal mortality rate and adoslescent birth rate. 
+
+```{r}
+pca_human <- prcomp(human)
+pca_human
+biplot(pca_human, choises = 1:2, cex =c(0.5, 0.8))
+```
+
+Without standardization of the variables, the correlation naturally favors the gnicap as it has significantly larger value than any other variable. In fact the biplot above is mostly useless. Principal component 1 is dominated by the gnicap value as is also seen in the PCA table. 
+
+```{r}
+human_std <- scale(human)
+human_std_pca <- prcomp(human_std)
+human_std_pca
+biplot(human_std_pca, choises = 1:2, cex = c(0.5, 0.8), col = c("grey40", "deeppink2"))
+```
+
+Now we can much better see the results, and also now the results are more meaningful as the higher value of gni has replaced by standardized value. This allow us to more easily see how the principal component factors factor in. We can also see which variables have similar effect, aka. have correlation. 
+
+Clearly we now see that the Y-axis variables have mostly to do with healthcare issues (maternal mortality, birth rate, etc.) and GNI while the PCA2 shows workforce female proportion and parliament representation. 
+

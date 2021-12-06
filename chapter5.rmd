@@ -1,11 +1,15 @@
 # Dimensionality reduction techniques
 
+The following exercise is for dimensionality reduction techniques. 
+
 ```{r}
+
 library("ggplot2")                     
 library("GGally")
 library("corrplot")
 library("tidyverse")
 library("vtable")
+library("FactoMineR")
 
 human <- read.csv("data/human.cvs")
 rownames(human) <- human$X
@@ -13,7 +17,7 @@ human <- select(human, -X)
 
 ```
 
-The following exercise is for dimensionality reduction techniques. IT is done by using the United Nations Development Programme data which is freely available. The data is available with explanations from the url below. 
+The exercise is done by using the United Nations Development Programme data which is freely available. The data is available with explanations from the url below. 
 
 http://hdr.undp.org/en/content/human-development-index-hdi
 
@@ -46,3 +50,34 @@ Now we can much better see the results, and also now the results are more meanin
 
 Clearly we now see that the Y-axis variables have mostly to do with healthcare issues (maternal mortality, birth rate, etc.) and GNI while the PCA2 shows workforce female proportion and parliament representation. 
 
+```{r}
+data(tea)
+
+# Lots of variables in the data, select only a few for clarity
+keep_columns <- c("Tea", "price", "age_Q", "frequency", "sex", "SPC")
+
+# select the 'keep_columns' to create a new dataset
+tea <- select(tea, one_of(keep_columns))
+
+# look at the summaries and structure of the data
+summary(tea)
+
+# visualize the dataset
+gather(tea) %>% ggplot(aes(value)) + facet_wrap("key", scales = "free") + geom_bar() + theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 8))
+```
+
+The Tea-dataset contains lots of variables. Here we use only some for the clarity of the output from the tools we use. I selected the six variables above for this excercise. Overall the data sems fairly nicely distributed, none of the variables have a single dominant value. 
+
+```{r}
+
+# multiple correspondence analysis
+mca <- MCA(tea, graph = FALSE)
+
+# summary of the model
+summary(mca)
+
+# visualize MCA
+plot(mca, invisible=c("ind"), habillage = "quali", graph.type = "ggplot")
+```
+
+My selected variables seem to be fairly equally distributed in the MCA dimensions. There are some slightly obviously related groups, like age 60+ and non-worker, perhaps surpricingly cheap price is also close to these. Students and young age also close by each other. 

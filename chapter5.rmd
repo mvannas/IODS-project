@@ -13,7 +13,7 @@ library("FactoMineR")
 
 human <- read.csv("data/human.cvs")
 rownames(human) <- human$X
-human <- select(human, -X)
+human <- dplyr::select(human, -X)
 
 ```
 
@@ -57,7 +57,7 @@ data(tea)
 keep_columns <- c("Tea", "price", "age_Q", "frequency", "sex", "SPC")
 
 # select the 'keep_columns' to create a new dataset
-tea <- select(tea, one_of(keep_columns))
+tea <- dplyr::select(tea, one_of(keep_columns))
 
 # look at the summaries and structure of the data
 summary(tea)

@@ -27,7 +27,10 @@ output:
 
 ***
   
-Chapter 3 is broken. 
+```{r child = "chapter3.Rmd"}
+# This will include Chapter 3 (that is updated in its own file) in the document.
+```
+
 
 ***
 
@@ -37,7 +40,10 @@ Chapter 3 is broken.
 
 ***
 
-Chapter 5 is broken. 
+```{r child = "chapter5.Rmd"}
+# This will include Chapter 5 (that is updated in its own file) in the document.
+```
+
 
 ***
 

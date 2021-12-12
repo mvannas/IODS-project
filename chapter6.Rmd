@@ -5,7 +5,7 @@ The final chapter of this course. This time we analyze longitunal data. The wran
 The exercise uses to sets of data. Both are somewhat similar, with subject identifier and a group variable as factors that do not change between observations and columns with time in the columns names (weeks, WD) with the value of the response variable. These have been previously from this analysis been converted (in the data wrangling part) to longer form. 
 
 ```{r}
-# Read datasets from file and initialie required libraries
+# Read datasets from file and initialize required libraries
 library(tidyr)
 library(dplyr)
 library(vtable)
@@ -20,9 +20,9 @@ BPRSL$treatment <- factor(BPRSL$treatment)
 RATSL$ID <- factor(RATSL$ID)
 RATSL$Group <- factor(RATSL$Group)
 
-# abd remove the X variables
-BPRSL <- select(BPRSL, -X)
-RATSL <- select(RATSL, -X)
+# and remove the X variables
+BPRSL <- dplyr::select(BPRSL, -X)
+RATSL <- dplyr::select(RATSL, -X)
 
 ```
 

@@ -19,7 +19,7 @@ library("GGally")
 library("ggplot2")
 library("dplyr")
 
-d_sub <- select(d, sex, age, romantic, Pstatus, alc_high)
+d_sub <- dplyr::select(d, sex, age, romantic, Pstatus, alc_high)
 # Convert romatic and Pstatus to boolen, Pstatus TRUE if together
 
 d_sub <- d_sub %>% mutate(romantic=(romantic == "yes"), Pstatus=(Pstatus=="T"))

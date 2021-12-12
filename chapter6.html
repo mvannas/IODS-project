@@ -171,7 +171,7 @@ pre code {
 <h1>Analysis of Longitunal Data</h1>
 <p>The final chapter of this course. This time we analyze longitunal data. The wranglng part consisted of taking dataset what was in wide-form (aka. single line for an observation, with time depended observation value as separate columns) and converted to long form where there are more observations (aka. lines) but with a time depended parameter. To achieve this one must separate the values that do not change between observations (aka. subject identifiers, group designators, etc.) from the time depended response variables.</p>
 <p>The exercise uses to sets of data. Both are somewhat similar, with subject identifier and a group variable as factors that do not change between observations and columns with time in the columns names (weeks, WD) with the value of the response variable. These have been previously from this analysis been converted (in the data wrangling part) to longer form.</p>
-<pre class="r"><code># Read datasets from file and initialie required libraries
+<pre class="r"><code># Read datasets from file and initialize required libraries
 library(tidyr)
 library(dplyr)</code></pre>
 <pre><code>## 
@@ -200,9 +200,9 @@ BPRSL$treatment &lt;- factor(BPRSL$treatment)
 RATSL$ID &lt;- factor(RATSL$ID)
 RATSL$Group &lt;- factor(RATSL$Group)
 
-# abd remove the X variables
-BPRSL &lt;- select(BPRSL, -X)
-RATSL &lt;- select(RATSL, -X)</code></pre>
+# and remove the X variables
+BPRSL &lt;- dplyr::select(BPRSL, -X)
+RATSL &lt;- dplyr::select(RATSL, -X)</code></pre>
 <pre class="r"><code>ggplot(RATSL, aes(x = Time, y = rats, linetype = ID)) +
   geom_line() +
   scale_linetype_manual(values = rep(1:10, times=4)) +

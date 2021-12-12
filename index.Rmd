@@ -37,7 +37,11 @@ Chapter 3 is broken.
 
 ***
 
-```{r child = "chapter5.Rmd"}
-# This will include Chapter 5 (that is updated in its own file) in the document.
+Chapter 5 is broken. 
+
+***
+
+```{r child = "chapter6.Rmd"}
+# This will include Chapter 6 (that is updated in its own file) in the document.
 ```
 

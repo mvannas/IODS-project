@@ -1,0 +1,87 @@
+# Analysis of Longitunal Data
+
+The final chapter of this course. This time we analyze longitunal data. The wranglng part consisted of taking dataset what was in wide-form (aka. single line for an observation, with time depended observation value as separate columns) and converted to long form where there are more observations (aka. lines) but with a time depended parameter. To achieve this one must separate the values that do not change between observations (aka. subject identifiers, group designators, etc.) from the time depended response variables. 
+
+The exercise uses to sets of data. Both are somewhat similar, with subject identifier and a group variable as factors that do not change between observations and columns with time in the columns names (weeks, WD) with the value of the response variable. These have been previously from this analysis been converted (in the data wrangling part) to longer form. 
+
+```{r}
+# Read datasets from file and initialie required libraries
+library(tidyr)
+library(dplyr)
+library(vtable)
+library(ggplot2)
+
+BPRSL <- read.csv("data/bprsl.csv")
+RATSL <- read.csv("data/ratsl.csv")
+
+# Factor the categories again, just in case
+BPRSL$subject <- factor(BPRSL$subject)
+BPRSL$treatment <- factor(BPRSL$treatment)
+RATSL$ID <- factor(RATSL$ID)
+RATSL$Group <- factor(RATSL$Group)
+
+# abd remove the X variables
+BPRSL <- select(BPRSL, -X)
+RATSL <- select(RATSL, -X)
+
+```
+
+```{r}
+ggplot(RATSL, aes(x = Time, y = rats, linetype = ID)) +
+  geom_line() +
+  scale_linetype_manual(values = rep(1:10, times=4)) +
+  facet_grid(. ~ Group, labeller = label_both) +
+  theme(legend.position = "none") + 
+  scale_y_continuous(limits = c(min(RATSL$rats), max(RATSL$rats)))
+```
+
+
+```{r}
+
+# Number of Days
+n <- RATSL$Time %>% unique() %>% length()
+
+# Summary data with mean and standard error of RATS by Group and Time 
+RATSS <- RATSL %>%
+  group_by(Group, Time) %>%
+  summarise( mean = mean(rats), se = sd(rats) / sqrt(n) ) %>%
+  ungroup()
+
+# Plot the mean profiles
+ggplot(RATSS, aes(x = Time, y = mean, linetype = Group, shape = Group)) +
+  geom_line() +
+  scale_linetype_manual(values = c(1,2,3)) +
+  geom_point(size=3) +
+  scale_shape_manual(values = c(1,2,3)) +
+  geom_errorbar(aes(ymin=mean-se, ymax=mean+se, linetype="1"), width=0.3) +
+  theme(legend.position = c(0.8,0.8)) +
+  scale_y_continuous(name = "mean(rats) +/- se(rats)")
+```
+
+```{r}
+
+RATSL8S <- RATSL %>%
+  filter(Time > 0) %>%
+  group_by(Group, ID) %>%
+  summarise( mean=mean(rats) ) %>%
+  ungroup()
+
+ggplot(RATSL8S, aes(x = Group, y = mean)) +
+  geom_boxplot() +
+  stat_summary(fun.y = "mean", geom = "point", shape=23, size=4, fill = "white") +
+  scale_y_continuous(name = "mean(rats), WD 1-64")
+
+```
+
+
+```{r}
+# Compute analysis of variance to see if differences in groups are significant
+aov <- aov(mean ~ Group, data = RATSL8S)
+summary(aov)
+
+# Use pairwise comparisons to see which groups differ significantly. 
+TukeyHSD(aov)
+
+```
+
+While there are some outliers evident from the previous graphs, I decided to leave them, as the boxplots still suggest there might be a statistically significant difference between at least Group 1 and Group 2, as well as betwneen Group 1 and Group 2. I further used anova to analyze the means between groups, which proves that there is a significant difference between Groups. To further distinguihs between which groups the difference exists, I used Tukey multiple pairwise-comparisons. The p value for pairwise comparinsons between Groups 2 and 1 as well as 3 and 1 are significant. This nicely supports what the graphical boxplots suggest. However altough the confidence intervals for group 2 and 3 do not mostly cross in the previous graphs, they do not seem to differ significantly in pairwise-comparisons. 

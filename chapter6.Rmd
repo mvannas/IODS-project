@@ -10,6 +10,7 @@ library(tidyr)
 library(dplyr)
 library(vtable)
 library(ggplot2)
+library(lme4)
 
 BPRSL <- read.csv("data/bprsl.csv")
 RATSL <- read.csv("data/ratsl.csv")
@@ -84,4 +85,52 @@ TukeyHSD(aov)
 
 ```
 
-While there are some outliers evident from the previous graphs, I decided to leave them, as the boxplots still suggest there might be a statistically significant difference between at least Group 1 and Group 2, as well as betwneen Group 1 and Group 2. I further used anova to analyze the means between groups, which proves that there is a significant difference between Groups. To further distinguihs between which groups the difference exists, I used Tukey multiple pairwise-comparisons. The p value for pairwise comparinsons between Groups 2 and 1 as well as 3 and 1 are significant. This nicely supports what the graphical boxplots suggest. However altough the confidence intervals for group 2 and 3 do not mostly cross in the previous graphs, they do not seem to differ significantly in pairwise-comparisons. 
+While there are some outliers evident from the previous graphs, I decided to leave them, as the boxplots still suggest there might be a statistically significant difference between at least Group 1 and Group 2, as well as between Group 1 and Group 2. I further used anova to analyze the means between groups, which proves that there is a significant difference between Groups. To further distinguish between which groups the difference exists, I used Tukey multiple pairwise-comparisons. The p value for pairwise comparisons between Groups 2 and 1 as well as 3 and 1 are significant. This nicely supports what the graphical boxplots suggest. However although the confidence intervals for group 2 and 3 do not mostly cross in the previous graphs, they do not seem to differ significantly in pairwise-comparisons. 
+
+Next we use the BPRS dataset to do a linear mixed effects model. 
+
+```{r}
+ggplot(BPRSL, aes(x = week, y = bprs, linetype = subject)) +
+  geom_line() +
+  scale_linetype_manual(values = rep(1:10, times=4)) +
+  facet_grid(. ~ treatment, labeller = label_both) +
+  theme(legend.position = "none") + 
+  scale_y_continuous(limits = c(min(BPRSL$bprs), max(BPRSL$bprs)))
+```
+
+There does not seem to be a significant difference between the treatment groups. Let try to create a regression model. 
+
+```{r}
+BPRS_reg <- lm(bprs ~ week + treatment, data = BPRSL)
+
+# print out a summary of the model
+summary(BPRS_reg)
+```
+
+Treament group does not seem to be a significant explanatory variable, however weeks is significant.  
+
+```{r}
+BPRS_ref <- lmer(bprs ~ week + treatment + (1 | subject), data = BPRSL, REML = FALSE)
+BPRS_ref1 <- lmer(bprs ~ week + treatment + (week | subject), data = BPRSL, REML = FALSE)
+anova(BPRS_ref1, BPRS_ref)
+```
+
+We see that with week the intercept model is slightly better (Chi-Square p of 0.02636). Now we create model that combines treatment with time (weeks) and compare that with the model that has just time (weeks) previously.
+
+```{r}
+BPRS_ref2 <- lmer(bprs ~ week * treatment + (week | subject), data = BPRSL, REML = FALSE)
+anova(BPRS_ref2, BPRS_ref1)
+```
+
+It would seem that this model is not significantly better that the model with just time. This would seem to match with our previous assumptions from the graphs that the treatment does not have a significant difference in the bprs scores. 
+
+Finally lets try to create a version with fitted values and draw a graphs representing them. 
+
+```{r}
+#ggplot(BPRSL, aes(x = week, y = bprs, group = subject)) +
+#  geom_line(aes(linetype = treatment)) +
+#  scale_x_continuous(name = "Time (weeks)", breaks = seq(0, 60, 20)) +
+#  scale_y_continuous(name = "Score") +
+#  theme(legend.position = "top")
+```
+

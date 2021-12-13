@@ -127,10 +127,16 @@ It would seem that this model is not significantly better that the model with ju
 Finally lets try to create a version with fitted values and draw a graphs representing them. 
 
 ```{r}
-#ggplot(BPRSL, aes(x = week, y = bprs, group = subject)) +
-#  geom_line(aes(linetype = treatment)) +
-#  scale_x_continuous(name = "Time (weeks)", breaks = seq(0, 60, 20)) +
-#  scale_y_continuous(name = "Score") +
-#  theme(legend.position = "top")
+
+Fitted <- fitted(BPRS_ref2)
+BPRSL <- BPRSL %>% mutate(Fitted)
+
+ggplot(BPRSL, aes(x = week, y = Fitted, linetype = subject)) +
+  geom_line() +
+  scale_linetype_manual(values = rep(1:10, times=4)) +
+  facet_grid(. ~ treatment, labeller = label_both) +
+  theme(legend.position = "none") + 
+  scale_y_continuous(limits = c(min(BPRSL$bprs), max(BPRSL$bprs)))
 ```
 
+Comparing these fitted graphs with the previous graphs with real values it seems the model does seem to fit quite nicely. however, there is negligble difference in the between groups. In fact most difference seems to be at intercept (aka week 0). This difference suggests that the participant randomization to two treatment groups has in fact failed. 
